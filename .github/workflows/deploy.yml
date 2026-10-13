@@ -1,0 +1,118 @@
+# Utrulling til GitHub Pages. Pages har én adresse per repo, så dette ER produksjon.
+# Det finnes ikke noe staging-miljø. Én artefakt bygges, testes i runneren (forhandstest)
+# og rulles ut uendret (produksjon). Ingen jobb bygger på nytt.
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  bygg:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.digest.outputs.digest }}
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}   # nøyaktig commiten CI godkjente
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Regn ut digest av artefakten
+        id: digest
+        run: |
+          digest=$(cd dist && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "Artefakt-digest (sha256): \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: frontend/dist
+          retention-days: 7   # tid til å godkjenne produksjon før artefakten utløper
+
+  # Erstatter «test eksakt digest i staging»: samme artefakt serveres i runneren og røyktestes.
+  # Ingenting publiseres her.
+  forhandstest:
+    needs: bygg
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/pages
+      - name: Pakk ut artefakten og kontroller digest
+        env:
+          FORVENTET: ${{ needs.bygg.outputs.digest }}
+        run: |
+          antall=$(find "$RUNNER_TEMP/pages" -type f | wc -l)
+          if [ "$antall" -ne 1 ]; then
+            echo "::error::Forventet én arkivfil i artefakten, fant $antall"
+            exit 1
+          fi
+          mkdir dist
+          tar -xf "$(find "$RUNNER_TEMP/pages" -type f)" -C dist
+          faktisk=$(cd dist && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)
+          if [ -z "$FORVENTET" ] || [ "$faktisk" != "$FORVENTET" ]; then
+            echo "::error::Digest avviker. Forventet '$FORVENTET', fikk '$faktisk'"
+            exit 1
+          fi
+          echo "Forhåndstestet digest (sha256): \`$faktisk\`" >> "$GITHUB_STEP_SUMMARY"
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+        env:
+          E2E_FERDIGBYGD: "1"   # test dist/ fra artefakten, ikke bygg på nytt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: playwright-rapport-forhandstest
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 14
+
+  # Fail closed: kjører bare når repo-variabelen PRODUKSJON_GODKJENNING_VERIFISERT er 'true'.
+  # Sett den først når miljøet `production` har Required reviewers og sperren er testet.
+  # Uten variabelen hoppes jobben over, og ingenting publiseres.
+  produksjon:
+    needs: [bygg, forhandstest]
+    if: vars.PRODUKSJON_GODKJENNING_VERIFISERT == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Rull ut artefakten fra bygg-jobben
+        id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
