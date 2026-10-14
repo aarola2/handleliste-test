@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Handleliste – prototype</title>
+  <!-- Klikkbar prototype (#6). Selvstendig fil: ingen eksterne ressurser og ingen lagring. -->
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #1f2328;
+      --muted: #59636e;
+      --border: #d0d7de;
+      --accent: #0b5cad;
+      --accent-text: #ffffff;
+      --error: #b3261e;
+      --focus: #0b5cad;
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 1rem/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    main {
+      max-width: 32rem;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    h1 { margin: 0 0 1rem; font-size: 1.75rem; }
+
+    label { font-weight: 600; }
+
+    .add-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      min-height: 44px;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font: inherit;
+    }
+
+    button {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent);
+      color: var(--accent-text);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .message {
+      min-height: 1.5rem;
+      margin: 0.5rem 0 0;
+      color: var(--error);
+    }
+
+    .counter {
+      margin: 1rem 0 0.5rem;
+      color: var(--muted);
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.25rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    li label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-height: 44px;
+      font-weight: 400;
+      cursor: pointer;
+    }
+
+    li input[type="checkbox"] {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin: 0;
+      flex: none;
+    }
+
+    .name { overflow-wrap: anywhere; }
+
+    .bought .name {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .empty {
+      margin: 1rem 0;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Handleliste</h1>
+
+    <form id="add-form" novalidate>
+      <label for="item-name">Vare</label>
+      <div class="add-row">
+        <input id="item-name" type="text" autocomplete="off">
+        <button type="submit">Legg til</button>
+      </div>
+      <p id="message" class="message" role="alert"></p>
+    </form>
+
+    <p id="counter" class="counter" aria-live="polite"></p>
+    <ul id="items" aria-label="Varer"></ul>
+    <p id="empty" class="empty" hidden>Listen er tom.</p>
+  </main>
+
+  <script>
+    'use strict';
+
+    const items = [
+      { id: 1, name: 'Melk', bought: false },
+      { id: 2, name: 'Brød', bought: false },
+      { id: 3, name: 'Egg', bought: true },
+    ];
+    let nextId = 4;
+
+    const form = document.getElementById('add-form');
+    const field = document.getElementById('item-name');
+    const message = document.getElementById('message');
+    const counter = document.getElementById('counter');
+    const list = document.getElementById('items');
+    const empty = document.getElementById('empty');
+
+    function sameName(a, b) {
+      return a.toLocaleLowerCase('nb') === b.toLocaleLowerCase('nb');
+    }
+
+    function addItem(rawName) {
+      const name = rawName.trim();
+      if (name === '') {
+        message.textContent = 'Skriv inn navnet på en vare.';
+        return;
+      }
+      const existing = items.find((item) => sameName(item.name, name));
+      if (existing) {
+        message.textContent = existing.name + ' står allerede på listen.';
+        return;
+      }
+      items.push({ id: nextId++, name, bought: false });
+      message.textContent = '';
+      field.value = '';
+      render();
+    }
+
+    function toggleItem(id) {
+      const item = items.find((candidate) => candidate.id === id);
+      item.bought = !item.bought;
+      render();
+    }
+
+    function removeItem(id) {
+      items.splice(items.findIndex((item) => item.id === id), 1);
+      render();
+      field.focus();
+    }
+
+    function renderItem(item) {
+      const row = document.createElement('li');
+      row.className = item.bought ? 'bought' : '';
+
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = item.bought;
+      checkbox.dataset.focusKey = 'check-' + item.id;
+      checkbox.addEventListener('change', () => toggleItem(item.id));
+
+      const name = document.createElement('span');
+      name.className = 'name';
+      name.textContent = item.name; // tekst, aldri HTML
+      label.append(checkbox, name);
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'secondary';
+      remove.textContent = 'Slett';
+      remove.setAttribute('aria-label', 'Slett ' + item.name);
+      remove.dataset.focusKey = 'remove-' + item.id;
+      remove.addEventListener('click', () => removeItem(item.id));
+
+      row.append(label, remove);
+      return row;
+    }
+
+    function counterText(remaining) {
+      return remaining + (remaining === 1 ? ' vare igjen' : ' varer igjen');
+    }
+
+    // Tegner listen på nytt og gir fokus tilbake til samme kontroll, så tastaturbrukere ikke mister plassen.
+    function render() {
+      const focusKey = document.activeElement && document.activeElement.dataset.focusKey;
+      const toBuy = items.filter((item) => !item.bought);
+      const bought = items.filter((item) => item.bought);
+
+      list.replaceChildren(...toBuy.concat(bought).map(renderItem));
+      empty.hidden = items.length > 0;
+      counter.textContent = counterText(toBuy.length);
+
+      if (focusKey) {
+        const target = list.querySelector('[data-focus-key="' + focusKey + '"]');
+        if (target) target.focus();
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      addItem(field.value);
+    });
+
+    render();
+  </script>
+</body>
+</html>
