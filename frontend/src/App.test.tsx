@@ -5,5 +5,5 @@ import App from './App.tsx'
 test('viser overskriften', () => {
   render(<App />)
 
-  expect(screen.getByRole('heading', { level: 1, name: 'Handleliste' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { level: 1, name: 'Handlelista' })).toBeInTheDocument()
 })
