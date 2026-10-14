@@ -6,7 +6,7 @@
 
 ## Kjøre
 
-Produksjonsgrinden (Required reviewers på miljøet `production`) er testet.
+Produksjonsgrinden (Required reviewers på miljøet `production`) skal testes.
 
 ## Teste
 
