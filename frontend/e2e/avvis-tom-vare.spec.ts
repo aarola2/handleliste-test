@@ -55,6 +55,8 @@ test('feilmeldingen forsvinner når en gyldig vare legges til', async ({ page })
   await field.fill('Melk')
   await add.click()
 
-  await expect(items).toHaveText(['Melk'])
+  // Sjekker navnet, ikke hele raden, så testen tåler flere kontroller i raden (avkrysning og sletting).
+  await expect(items).toHaveCount(1)
+  await expect(items).toContainText(['Melk'])
   await expect(message).toHaveText('')
 })
