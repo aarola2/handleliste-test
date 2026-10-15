@@ -43,3 +43,16 @@ test('kan legge til samme navn på nytt etter sletting', async () => {
 
   expect(screen.getByRole('button', { name: 'Slett Melk' })).toBeInTheDocument()
 })
+
+test('krysser av en vare og fjerner avkrysningen igjen', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  await user.type(screen.getByLabelText('Vare'), 'Melk{Enter}')
+  const checkbox = screen.getByRole('checkbox', { name: 'Melk' })
+
+  await user.click(checkbox)
+  expect(checkbox).toBeChecked()
+
+  await user.click(checkbox)
+  expect(checkbox).not.toBeChecked()
+})

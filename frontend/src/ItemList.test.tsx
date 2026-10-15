@@ -8,10 +8,11 @@ const noop = () => undefined
 test('viser varene i rekkefølge', () => {
   render(
     <ItemList
+      onToggle={noop}
       onRemove={noop}
       items={[
-        { id: 1, name: 'Melk' },
-        { id: 2, name: 'Brød' },
+        { id: 1, name: 'Melk', bought: false },
+        { id: 2, name: 'Brød', bought: false },
       ]}
     />,
   )
@@ -21,20 +22,62 @@ test('viser varene i rekkefølge', () => {
 })
 
 test('viser et navn med HTML som ren tekst', () => {
-  render(<ItemList onRemove={noop} items={[{ id: 1, name: '<b>x</b>' }]} />)
+  render(
+    <ItemList
+      onToggle={noop}
+      onRemove={noop}
+      items={[{ id: 1, name: '<b>x</b>', bought: false }]}
+    />,
+  )
 
   const item = screen.getByRole('listitem')
   expect(item).toHaveTextContent('<b>x</b>')
   expect(item.querySelector('b')).toBeNull()
 })
 
+test('gir hver vare en avkrysningsboks merket med navnet, avkrysset når varen er handlet', () => {
+  render(
+    <ItemList
+      onToggle={noop}
+      onRemove={noop}
+      items={[
+        { id: 1, name: 'Melk', bought: false },
+        { id: 2, name: 'Brød', bought: true },
+      ]}
+    />,
+  )
+
+  expect(screen.getByRole('checkbox', { name: 'Melk' })).not.toBeChecked()
+  expect(screen.getByRole('checkbox', { name: 'Brød' })).toBeChecked()
+})
+
+test('sender id-en til varen som krysses av', async () => {
+  const onToggle = vi.fn<(id: number) => void>()
+  const user = userEvent.setup()
+  render(
+    <ItemList
+      onToggle={onToggle}
+      onRemove={noop}
+      items={[
+        { id: 1, name: 'Melk', bought: false },
+        { id: 2, name: 'Brød', bought: false },
+      ]}
+    />,
+  )
+
+  await user.click(screen.getByRole('checkbox', { name: 'Brød' }))
+
+  expect(onToggle).toHaveBeenCalledExactlyOnceWith(2)
+})
+
 test('gir hver vare en sletteknapp med varens navn', () => {
   render(
     <ItemList
+      onToggle={noop}
       onRemove={noop}
       items={[
-        { id: 1, name: 'Melk' },
-        { id: 2, name: 'Brød' },
+        { id: 1, name: 'Melk', bought: false },
+        { id: 2, name: 'Brød', bought: false },
       ]}
     />,
   )
@@ -48,10 +91,11 @@ test('sender id-en til varen som slettes', async () => {
   const user = userEvent.setup()
   render(
     <ItemList
+      onToggle={noop}
       onRemove={onRemove}
       items={[
-        { id: 1, name: 'Melk' },
-        { id: 2, name: 'Brød' },
+        { id: 1, name: 'Melk', bought: false },
+        { id: 2, name: 'Brød', bought: false },
       ]}
     />,
   )
