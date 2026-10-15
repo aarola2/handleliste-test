@@ -18,6 +18,32 @@ test('legger en ny vare i listen', async () => {
   expect(screen.getByRole('listitem')).toHaveTextContent('Melk')
 })
 
+test('sletter en vare, lar de andre stå og gir fokus til feltet', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  const field = screen.getByLabelText('Vare')
+  await user.type(field, 'Melk{Enter}')
+  await user.type(field, 'Brød{Enter}')
+
+  await user.click(screen.getByRole('button', { name: 'Slett Melk' }))
+
+  expect(screen.getAllByRole('listitem')).toHaveLength(1)
+  expect(screen.getByRole('listitem')).toHaveTextContent('Brød')
+  expect(field).toHaveFocus()
+})
+
+test('kan legge til samme navn på nytt etter sletting', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  const field = screen.getByLabelText('Vare')
+  await user.type(field, 'Melk{Enter}')
+  await user.click(screen.getByRole('button', { name: 'Slett Melk' }))
+
+  await user.type(field, 'Melk{Enter}')
+
+  expect(screen.getByRole('button', { name: 'Slett Melk' })).toBeInTheDocument()
+})
+
 test('krysser av en vare og fjerner avkrysningen igjen', async () => {
   const user = userEvent.setup()
   render(<App />)

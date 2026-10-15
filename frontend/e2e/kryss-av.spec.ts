@@ -55,12 +55,17 @@ test('avkrysning virker med tastatur', async ({ page }) => {
   await expect(checkbox('Melk')).toBeChecked()
   await expect(checkbox('Melk')).toBeFocused()
 
+  // Sletteknappen står mellom avkrysningsboksene i tabulatorrekkefølgen (som i prototypen).
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Slett Melk' })).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(checkbox('Brød')).toBeFocused()
   await page.keyboard.press('Space')
   await expect(checkbox('Brød')).toBeChecked()
 
   await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Shift+Tab')
+  await expect(checkbox('Melk')).toBeFocused()
   await page.keyboard.press('Space')
   await expect(checkbox('Melk')).not.toBeChecked()
 })

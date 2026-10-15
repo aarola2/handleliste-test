@@ -9,6 +9,7 @@ test('viser varene i rekkefølge', () => {
   render(
     <ItemList
       onToggle={noop}
+      onRemove={noop}
       items={[
         { id: 1, name: 'Melk', bought: false },
         { id: 2, name: 'Brød', bought: false },
@@ -16,11 +17,18 @@ test('viser varene i rekkefølge', () => {
     />,
   )
 
-  expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Melk', 'Brød'])
+  const names = screen.getAllByRole('listitem').map((item) => item.firstElementChild?.textContent)
+  expect(names).toEqual(['Melk', 'Brød'])
 })
 
 test('viser et navn med HTML som ren tekst', () => {
-  render(<ItemList onToggle={noop} items={[{ id: 1, name: '<b>x</b>', bought: false }]} />)
+  render(
+    <ItemList
+      onToggle={noop}
+      onRemove={noop}
+      items={[{ id: 1, name: '<b>x</b>', bought: false }]}
+    />,
+  )
 
   const item = screen.getByRole('listitem')
   expect(item).toHaveTextContent('<b>x</b>')
@@ -31,6 +39,7 @@ test('gir hver vare en avkrysningsboks merket med navnet, avkrysset når varen e
   render(
     <ItemList
       onToggle={noop}
+      onRemove={noop}
       items={[
         { id: 1, name: 'Melk', bought: false },
         { id: 2, name: 'Brød', bought: true },
@@ -48,6 +57,7 @@ test('sender id-en til varen som krysses av', async () => {
   render(
     <ItemList
       onToggle={onToggle}
+      onRemove={noop}
       items={[
         { id: 1, name: 'Melk', bought: false },
         { id: 2, name: 'Brød', bought: false },
@@ -58,4 +68,39 @@ test('sender id-en til varen som krysses av', async () => {
   await user.click(screen.getByRole('checkbox', { name: 'Brød' }))
 
   expect(onToggle).toHaveBeenCalledExactlyOnceWith(2)
+})
+
+test('gir hver vare en sletteknapp med varens navn', () => {
+  render(
+    <ItemList
+      onToggle={noop}
+      onRemove={noop}
+      items={[
+        { id: 1, name: 'Melk', bought: false },
+        { id: 2, name: 'Brød', bought: false },
+      ]}
+    />,
+  )
+
+  expect(screen.getByRole('button', { name: 'Slett Melk' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Slett Brød' })).toBeInTheDocument()
+})
+
+test('sender id-en til varen som slettes', async () => {
+  const onRemove = vi.fn<(id: number) => void>()
+  const user = userEvent.setup()
+  render(
+    <ItemList
+      onToggle={noop}
+      onRemove={onRemove}
+      items={[
+        { id: 1, name: 'Melk', bought: false },
+        { id: 2, name: 'Brød', bought: false },
+      ]}
+    />,
+  )
+
+  await user.click(screen.getByRole('button', { name: 'Slett Brød' }))
+
+  expect(onRemove).toHaveBeenCalledExactlyOnceWith(2)
 })
