@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
-import { addItem, type Item } from './items.ts'
+import { addItem, toggleItem, type Item } from './items.ts'
 
 describe('addItem', () => {
   test('legger varen sist i listen', () => {
-    const items: Item[] = [{ id: 1, name: 'Melk' }]
+    const items: Item[] = [{ id: 1, name: 'Melk', bought: false }]
 
     expect(addItem(items, 'Brød').map((item) => item.name)).toEqual(['Melk', 'Brød'])
   })
@@ -14,8 +14,8 @@ describe('addItem', () => {
 
   test('gir den nye varen en id som ingen andre har', () => {
     const items: Item[] = [
-      { id: 1, name: 'Melk' },
-      { id: 5, name: 'Brød' },
+      { id: 1, name: 'Melk', bought: false },
+      { id: 5, name: 'Brød', bought: false },
     ]
 
     const ids = addItem(items, 'Egg').map((item) => item.id)
@@ -24,16 +24,41 @@ describe('addItem', () => {
   })
 
   test('endrer ikke den opprinnelige listen', () => {
-    const items: Item[] = [{ id: 1, name: 'Melk' }]
+    const items: Item[] = [{ id: 1, name: 'Melk', bought: false }]
 
     addItem(items, 'Brød')
 
-    expect(items).toEqual([{ id: 1, name: 'Melk' }])
+    expect(items).toEqual([{ id: 1, name: 'Melk', bought: false }])
   })
 
   test('legger ikke til noe når navnet er tomt etter trimming', () => {
-    const items: Item[] = [{ id: 1, name: 'Melk' }]
+    const items: Item[] = [{ id: 1, name: 'Melk', bought: false }]
 
     expect(addItem(items, '   ')).toBe(items)
+  })
+
+  test('legger til varen som ikke handlet', () => {
+    expect(addItem([], 'Melk')[0]?.bought).toBe(false)
+  })
+})
+
+describe('toggleItem', () => {
+  const items: Item[] = [
+    { id: 1, name: 'Melk', bought: false },
+    { id: 2, name: 'Brød', bought: true },
+  ]
+
+  test('krysser av bare varen med riktig id', () => {
+    expect(toggleItem(items, 1).map((item) => item.bought)).toEqual([true, true])
+  })
+
+  test('fjerner avkrysningen fra en handlet vare', () => {
+    expect(toggleItem(items, 2).map((item) => item.bought)).toEqual([false, false])
+  })
+
+  test('endrer ikke den opprinnelige listen', () => {
+    toggleItem(items, 1)
+
+    expect(items[0]?.bought).toBe(false)
   })
 })

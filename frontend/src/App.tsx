@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AddItemForm } from './AddItemForm.tsx'
 import { ItemList } from './ItemList.tsx'
-import { addItem, type Item } from './items.ts'
+import { addItem, toggleItem, type Item } from './items.ts'
 import './App.css'
 
 function App() {
@@ -15,7 +15,12 @@ function App() {
           setItems((current) => addItem(current, name))
         }}
       />
-      <ItemList items={items} />
+      <ItemList
+        items={items}
+        onToggle={(id) => {
+          setItems((current) => toggleItem(current, id))
+        }}
+      />
     </main>
   )
 }
