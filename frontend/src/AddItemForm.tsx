@@ -1,10 +1,11 @@
-import { useId, useState, type SubmitEvent } from 'react'
+import { useId, useState, type Ref, type SubmitEvent } from 'react'
 
 interface AddItemFormProps {
   onAdd: (name: string) => void
+  fieldRef?: Ref<HTMLInputElement>
 }
 
-export function AddItemForm({ onAdd }: AddItemFormProps) {
+export function AddItemForm({ onAdd, fieldRef }: AddItemFormProps) {
   const fieldId = useId()
   const [name, setName] = useState('')
 
@@ -19,6 +20,7 @@ export function AddItemForm({ onAdd }: AddItemFormProps) {
       <label htmlFor={fieldId}>Vare</label>
       <div className="add-row">
         <input
+          ref={fieldRef}
           id={fieldId}
           type="text"
           autoComplete="off"

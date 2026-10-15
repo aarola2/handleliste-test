@@ -10,6 +10,11 @@ export function addItem(items: readonly Item[], rawName: string): readonly Item[
   return [...items, { id: nextId(items), name }]
 }
 
+/** Fjerner varen med gitt id. */
+export function removeItem(items: readonly Item[], id: number): readonly Item[] {
+  return items.filter((item) => item.id !== id)
+}
+
 function nextId(items: readonly Item[]): number {
   return items.reduce((max, item) => Math.max(max, item.id), 0) + 1
 }
