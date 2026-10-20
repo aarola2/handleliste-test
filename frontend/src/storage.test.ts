@@ -72,6 +72,19 @@ describe('ødelagt lagring', () => {
     ])
   })
 
+  test('godtar id-er fra 1 til og med 1 000 000 000', () => {
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify([
+        { id: 1, name: 'Melk', bought: false },
+        { id: 1_000_000_000, name: 'Brød', bought: false },
+        { id: 1_000_000_001, name: 'Egg', bought: false },
+      ]),
+    )
+
+    expect(loadItems().map((item) => item.name)).toEqual(['Melk', 'Brød'])
+  })
+
   test('tar bare med den første av to oppføringer med samme id', () => {
     localStorage.setItem(
       storageKey,
