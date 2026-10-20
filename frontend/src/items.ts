@@ -26,6 +26,11 @@ export function toggleItem(items: readonly Item[], id: number): readonly Item[] 
   return items.map((item) => (item.id === id ? { ...item, bought: !item.bought } : item))
 }
 
+/** Gir handlede varer under de andre. Ellers står varene i samme rekkefølge som før. */
+export function boughtLast(items: readonly Item[]): readonly Item[] {
+  return [...items.filter((item) => !item.bought), ...items.filter((item) => item.bought)]
+}
+
 /** Fjerner varen med gitt id. */
 export function removeItem(items: readonly Item[], id: number): readonly Item[] {
   return items.filter((item) => item.id !== id)

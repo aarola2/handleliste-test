@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { addItem, findByName, removeItem, toggleItem, type Item } from './items.ts'
+import { addItem, boughtLast, findByName, removeItem, toggleItem, type Item } from './items.ts'
 
 describe('addItem', () => {
   test('legger varen sist i listen', () => {
@@ -109,5 +109,24 @@ describe('removeItem', () => {
     const ids = addItem(removeItem(items, 1), 'Ost').map((item) => item.id)
 
     expect(new Set(ids).size).toBe(3)
+  })
+})
+
+describe('boughtLast', () => {
+  const items: Item[] = [
+    { id: 1, name: 'Melk', bought: true },
+    { id: 2, name: 'Brød', bought: false },
+    { id: 3, name: 'Egg', bought: true },
+    { id: 4, name: 'Ost', bought: false },
+  ]
+
+  test('legger handlede varer under de andre og beholder rekkefølgen i hver gruppe', () => {
+    expect(boughtLast(items).map((item) => item.name)).toEqual(['Brød', 'Ost', 'Melk', 'Egg'])
+  })
+
+  test('endrer ikke den opprinnelige listen', () => {
+    boughtLast(items)
+
+    expect(items.map((item) => item.id)).toEqual([1, 2, 3, 4])
   })
 })
