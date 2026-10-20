@@ -105,6 +105,23 @@ test('sender id-en til varen som slettes', async () => {
   expect(onRemove).toHaveBeenCalledExactlyOnceWith(2)
 })
 
+test('viser handlede varer under varene som ikke er handlet', () => {
+  render(
+    <ItemList
+      onToggle={noop}
+      onRemove={noop}
+      items={[
+        { id: 1, name: 'Melk', bought: true },
+        { id: 2, name: 'Brød', bought: false },
+        { id: 3, name: 'Egg', bought: false },
+      ]}
+    />,
+  )
+
+  const names = screen.getAllByRole('listitem').map((item) => item.firstElementChild?.textContent)
+  expect(names).toEqual(['Brød', 'Egg', 'Melk'])
+})
+
 test('sier fra at listen er tom når det ikke finnes varer', () => {
   render(<ItemList onToggle={noop} onRemove={noop} items={[]} />)
 

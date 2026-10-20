@@ -115,6 +115,11 @@ button.secondary {
   flex: none;
 }
 
+.items .bought .name {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
 .empty {
   margin: 1rem 0;
   color: var(--muted);

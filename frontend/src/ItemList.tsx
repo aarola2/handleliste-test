@@ -1,4 +1,4 @@
-import type { Item } from './items.ts'
+import { boughtLast, type Item } from './items.ts'
 
 interface ItemListProps {
   items: readonly Item[]
@@ -18,8 +18,8 @@ export function ItemList({ items, onToggle, onRemove }: ItemListProps) {
 function ItemRows({ items, onToggle, onRemove }: ItemListProps) {
   return (
     <ul className="items" aria-label="Varer">
-      {items.map((item) => (
-        <li key={item.id}>
+      {boughtLast(items).map((item) => (
+        <li key={item.id} className={item.bought ? 'bought' : undefined}>
           <label>
             <input
               type="checkbox"
@@ -28,7 +28,7 @@ function ItemRows({ items, onToggle, onRemove }: ItemListProps) {
                 onToggle(item.id)
               }}
             />
-            {item.name}
+            <span className="name">{item.name}</span>
           </label>
           <button
             type="button"
