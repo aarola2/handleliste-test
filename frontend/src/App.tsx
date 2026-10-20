@@ -1,12 +1,17 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AddItemForm } from './AddItemForm.tsx'
 import { ItemList } from './ItemList.tsx'
 import { addItem, findByName, removeItem, toggleItem, type Item } from './items.ts'
+import { loadItems, saveItems } from './storage.ts'
 import './App.css'
 
 function App() {
-  const [items, setItems] = useState<readonly Item[]>([])
+  const [items, setItems] = useState<readonly Item[]>(loadItems)
   const fieldRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    saveItems(items)
+  }, [items])
 
   return (
     <main>
