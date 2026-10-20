@@ -119,3 +119,8 @@ button.secondary {
   margin: 0;
   flex: none;
 }
+
+.items .bought .name {
+  color: var(--muted);
+  text-decoration: line-through;
+}
