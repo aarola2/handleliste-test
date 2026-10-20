@@ -147,3 +147,24 @@ test('kan legge til, krysse av og slette når lagringen er blokkert', async () =
   expect(screen.getAllByRole('listitem')).toHaveLength(1)
   expect(screen.getByRole('checkbox', { name: 'Melk' })).toBeChecked()
 })
+
+test('oppdaterer telleren når varer legges til, krysses av, får fjernet avkrysningen og slettes', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  const field = screen.getByLabelText('Vare')
+  const counter = screen.getByRole('status')
+  expect(counter).toHaveTextContent('0 varer igjen')
+
+  await user.type(field, 'Melk{Enter}')
+  expect(counter).toHaveTextContent('1 vare igjen')
+  await user.type(field, 'Brød{Enter}')
+  expect(counter).toHaveTextContent('2 varer igjen')
+
+  await user.click(screen.getByRole('checkbox', { name: 'Melk' }))
+  expect(counter).toHaveTextContent('1 vare igjen')
+  await user.click(screen.getByRole('checkbox', { name: 'Melk' }))
+  expect(counter).toHaveTextContent('2 varer igjen')
+
+  await user.click(screen.getByRole('button', { name: 'Slett Brød' }))
+  expect(counter).toHaveTextContent('1 vare igjen')
+})

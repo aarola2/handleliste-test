@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AddItemForm } from './AddItemForm.tsx'
 import { ItemList } from './ItemList.tsx'
+import { RemainingCount } from './RemainingCount.tsx'
 import { addItem, findByName, removeItem, toggleItem, type Item } from './items.ts'
 import { loadItems, saveItems } from './storage.ts'
 import './App.css'
@@ -23,6 +24,7 @@ function App() {
           setItems((current) => addItem(current, name))
         }}
       />
+      <RemainingCount items={items} />
       <ItemList
         items={items}
         onToggle={(id) => {

@@ -81,9 +81,14 @@ button.secondary {
   color: var(--error);
 }
 
+.counter {
+  margin: 1rem 0 0.5rem;
+  color: var(--muted);
+}
+
 .items {
   list-style: none;
-  margin: 1rem 0 0;
+  margin: 0;
   padding: 0;
   border-top: 1px solid var(--border);
 }
