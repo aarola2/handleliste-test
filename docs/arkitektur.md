@@ -7,9 +7,18 @@ En enkel handleliste i nettleseren. Frontend er React + Vite + TypeScript. Det f
 ## Deler
 
 - `frontend/`: appen, med enhetstester ved siden av koden.
-- `frontend/e2e/`: Playwright-tester. `royktest.spec.ts` tester appen, og `prototype.spec.ts` tester prototypen.
+- `frontend/e2e/`: Playwright-tester. `royktest.spec.ts` tester appen, og `prototype.spec.ts` tester prototypen. Hvert brukstilfelle har sin egen fil med én test per akseptkriterium, for eksempel `legg-til-vare.spec.ts`, `avvis-tom-vare.spec.ts`, `kryss-av.spec.ts` og `slett-vare.spec.ts`.
 - `docs/design/handleliste.html`: godkjent klikkbar prototype (#6). Det er én selvstendig fil uten eksterne ressurser og uten lagring. Ordlyd og utseende i appen hentes herfra.
 - `docs/krav/`: brukerhistorier.
+
+## Appen
+
+All tilstand ligger i `App.tsx` som én liste med varer (`id`, `name`, `bought`). Listen finnes bare i minnet mens siden er åpen.
+
+- `src/items.ts`: rene funksjoner som lager en ny liste i stedet for å endre den gamle: `addItem` (trimmer navnet og avviser tomt navn), `toggleItem` og `removeItem`. Id-en til en ny vare er én høyere enn den høyeste id-en i listen.
+- `src/AddItemForm.tsx`: feltet «Vare» og knappen «Legg til». Feilmeldinger vises i et `role="alert"`-område som alltid står i DOM-en, så skjermlesere leser dem opp.
+- `src/ItemList.tsx`: én rad per vare med avkrysningsboks merket med navnet og knappen «Slett» (for skjermlesere «Slett <navn>»). Etter sletting går fokus til feltet, slik prototypen gjør.
+- Varenavn vises alltid som tekst. React escaper dem, så et navn med HTML blir ikke tolket.
 
 ## Kjøre
 
