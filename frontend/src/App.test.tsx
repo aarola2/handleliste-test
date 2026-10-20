@@ -57,6 +57,19 @@ test('krysser av en vare og fjerner avkrysningen igjen', async () => {
   expect(checkbox).not.toBeChecked()
 })
 
+test('avviser en vare som allerede står i listen, også når den er krysset av', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  const field = screen.getByLabelText('Vare')
+  await user.type(field, 'Melk{Enter}')
+  await user.click(screen.getByRole('checkbox', { name: 'Melk' }))
+
+  await user.type(field, 'MELK{Enter}')
+
+  expect(screen.getAllByRole('listitem')).toHaveLength(1)
+  expect(screen.getByRole('alert')).toHaveTextContent('Melk står allerede på listen.')
+})
+
 test('oppdaterer telleren når varer legges til, krysses av, får fjernet avkrysningen og slettes', async () => {
   const user = userEvent.setup()
   render(<App />)
