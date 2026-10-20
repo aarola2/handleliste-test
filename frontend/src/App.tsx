@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { AddItemForm } from './AddItemForm.tsx'
 import { ItemList } from './ItemList.tsx'
-import { addItem, removeItem, toggleItem, type Item } from './items.ts'
+import { addItem, findByName, removeItem, toggleItem, type Item } from './items.ts'
 import './App.css'
 
 function App() {
@@ -13,6 +13,7 @@ function App() {
       <h1>Handleliste</h1>
       <AddItemForm
         fieldRef={fieldRef}
+        findExisting={(name) => findByName(items, name)}
         onAdd={(name) => {
           setItems((current) => addItem(current, name))
         }}
