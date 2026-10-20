@@ -3,9 +3,10 @@ import type { Item } from './items.ts'
 interface ItemListProps {
   items: readonly Item[]
   onToggle: (id: number) => void
+  onRemove: (id: number) => void
 }
 
-export function ItemList({ items, onToggle }: ItemListProps) {
+export function ItemList({ items, onToggle, onRemove }: ItemListProps) {
   return (
     <ul className="items" aria-label="Varer">
       {items.map((item) => (
@@ -20,6 +21,16 @@ export function ItemList({ items, onToggle }: ItemListProps) {
             />
             {item.name}
           </label>
+          <button
+            type="button"
+            className="secondary"
+            aria-label={`Slett ${item.name}`}
+            onClick={() => {
+              onRemove(item.id)
+            }}
+          >
+            Slett
+          </button>
         </li>
       ))}
     </ul>
