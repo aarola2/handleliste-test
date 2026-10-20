@@ -4,11 +4,21 @@ export interface Item {
   bought: boolean
 }
 
-/** Legger til en vare sist med trimmet navn. Et tomt navn gir listen uendret. */
+/** Legger til en vare sist med trimmet navn. Et tomt navn eller et duplikat gir listen uendret. */
 export function addItem(items: readonly Item[], rawName: string): readonly Item[] {
   const name = rawName.trim()
-  if (name === '') return items
+  if (name === '' || findByName(items, name)) return items
   return [...items, { id: nextId(items), name, bought: false }]
+}
+
+/** Finner varen med samme navn, uavhengig av store og små bokstaver og mellomrom før og etter. */
+export function findByName(items: readonly Item[], rawName: string): Item | undefined {
+  const name = comparable(rawName)
+  return items.find((item) => comparable(item.name) === name)
+}
+
+function comparable(name: string): string {
+  return name.trim().toLocaleLowerCase('nb')
 }
 
 /** Snur avkrysningen på varen med gitt id. */
