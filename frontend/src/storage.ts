@@ -1,6 +1,8 @@
 import type { Item } from './items.ts'
 
 const storageKey = 'handleliste'
+// Langt over det appen selv lager, og langt under grensen der id + 1 ikke lenger gir et nytt tall.
+const maxId = 1_000_000_000
 
 /**
  * Henter listen som er lagret i nettleseren. Innholdet er ubetrodd: ødelagt eller blokkert lagring gir en tom liste,
@@ -40,5 +42,9 @@ function validItems(value: unknown): readonly Item[] {
 function isItem(value: unknown): value is Item {
   if (typeof value !== 'object' || value === null) return false
   const { id, name, bought } = value as Record<string, unknown>
-  return Number.isInteger(id) && typeof name === 'string' && name.trim() !== '' && typeof bought === 'boolean'
+  return isValidId(id) && typeof name === 'string' && name.trim() !== '' && typeof bought === 'boolean'
+}
+
+function isValidId(id: unknown): boolean {
+  return typeof id === 'number' && Number.isInteger(id) && id > 0 && id <= maxId
 }

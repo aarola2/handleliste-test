@@ -68,6 +68,12 @@ test('lagrede oppføringer med feil form, for eksempel uten navn, vises ikke', a
 
   await expect(items).toHaveCount(1)
   await expect(checkbox('Melk')).not.toBeChecked()
+
+  // Den filtrerte listen virker videre: en ny vare kan legges til og krysses av.
+  await addItems(page, ['Egg'])
+  await checkbox('Egg').check()
+  await expect(items).toHaveCount(2)
+  await expect(checkbox('Melk')).not.toBeChecked()
   expect(errors).toEqual([])
 })
 
