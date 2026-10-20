@@ -8,6 +8,15 @@ interface ItemListProps {
 
 export function ItemList({ items, onToggle, onRemove }: ItemListProps) {
   return (
+    <>
+      <ItemRows items={items} onToggle={onToggle} onRemove={onRemove} />
+      {items.length === 0 && <p className="empty">Listen er tom.</p>}
+    </>
+  )
+}
+
+function ItemRows({ items, onToggle, onRemove }: ItemListProps) {
+  return (
     <ul className="items" aria-label="Varer">
       {boughtLast(items).map((item) => (
         <li key={item.id} className={item.bought ? 'bought' : undefined}>
