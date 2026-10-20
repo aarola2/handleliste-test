@@ -121,3 +121,15 @@ test('viser handlede varer under varene som ikke er handlet', () => {
   const names = screen.getAllByRole('listitem').map((item) => item.firstElementChild?.textContent)
   expect(names).toEqual(['Brød', 'Egg', 'Melk'])
 })
+
+test('sier fra at listen er tom når det ikke finnes varer', () => {
+  render(<ItemList onToggle={noop} onRemove={noop} items={[]} />)
+
+  expect(screen.getByText('Listen er tom.')).toBeInTheDocument()
+})
+
+test('sier ikke at listen er tom når det finnes varer', () => {
+  render(<ItemList onToggle={noop} onRemove={noop} items={[{ id: 1, name: 'Melk', bought: true }]} />)
+
+  expect(screen.queryByText('Listen er tom.')).not.toBeInTheDocument()
+})

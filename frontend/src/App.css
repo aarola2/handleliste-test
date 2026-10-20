@@ -124,3 +124,8 @@ button.secondary {
   color: var(--muted);
   text-decoration: line-through;
 }
+
+.empty {
+  margin: 1rem 0;
+  color: var(--muted);
+}

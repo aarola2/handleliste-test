@@ -86,6 +86,18 @@ test('flytter en avkrysset vare nederst og tilbake til plassen sin når avkrysni
   expect(names()).toEqual(['Melk', 'Brød', 'Egg'])
 })
 
+test('viser at listen er tom til den første varen legges til, og igjen når den siste slettes', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  expect(screen.getByText('Listen er tom.')).toBeInTheDocument()
+
+  await user.type(screen.getByLabelText('Vare'), 'Melk{Enter}')
+  expect(screen.queryByText('Listen er tom.')).not.toBeInTheDocument()
+
+  await user.click(screen.getByRole('button', { name: 'Slett Melk' }))
+  expect(screen.getByText('Listen er tom.')).toBeInTheDocument()
+})
+
 test('oppdaterer telleren når varer legges til, krysses av, får fjernet avkrysningen og slettes', async () => {
   const user = userEvent.setup()
   render(<App />)
