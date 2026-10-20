@@ -70,6 +70,22 @@ test('avviser en vare som allerede står i listen, også når den er krysset av'
   expect(screen.getByRole('alert')).toHaveTextContent('Melk står allerede på listen.')
 })
 
+test('flytter en avkrysset vare nederst og tilbake til plassen sin når avkrysningen fjernes', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  const field = screen.getByLabelText('Vare')
+  for (const name of ['Melk', 'Brød', 'Egg']) {
+    await user.type(field, `${name}{Enter}`)
+  }
+  const names = () => screen.getAllByRole('listitem').map((item) => item.firstElementChild?.textContent)
+
+  await user.click(screen.getByRole('checkbox', { name: 'Melk' }))
+  expect(names()).toEqual(['Brød', 'Egg', 'Melk'])
+
+  await user.click(screen.getByRole('checkbox', { name: 'Melk' }))
+  expect(names()).toEqual(['Melk', 'Brød', 'Egg'])
+})
+
 test('husker varer, avkrysning og sletting når appen startes på nytt', async () => {
   const user = userEvent.setup()
   const { unmount } = render(<App />)
