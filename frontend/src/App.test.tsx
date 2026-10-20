@@ -56,3 +56,22 @@ test('krysser av en vare og fjerner avkrysningen igjen', async () => {
   await user.click(checkbox)
   expect(checkbox).not.toBeChecked()
 })
+
+test('husker varer, avkrysning og sletting når appen startes på nytt', async () => {
+  const user = userEvent.setup()
+  const { unmount } = render(<App />)
+  const field = screen.getByLabelText('Vare')
+  for (const name of ['Melk', 'Brød', 'Egg']) {
+    await user.type(field, `${name}{Enter}`)
+  }
+  await user.click(screen.getByRole('checkbox', { name: 'Melk' }))
+  await user.click(screen.getByRole('button', { name: 'Slett Brød' }))
+  unmount()
+
+  render(<App />)
+
+  expect(screen.getAllByRole('listitem')).toHaveLength(2)
+  expect(screen.getByRole('checkbox', { name: 'Melk' })).toBeChecked()
+  expect(screen.getByRole('checkbox', { name: 'Egg' })).not.toBeChecked()
+  expect(screen.queryByRole('checkbox', { name: 'Brød' })).not.toBeInTheDocument()
+})
