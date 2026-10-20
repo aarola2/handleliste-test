@@ -2,6 +2,7 @@
 :root {
   --bg: #ffffff;
   --text: #1f2328;
+  --muted: #59636e;
   --border: #d0d7de;
   --accent: #0b5cad;
   --accent-text: #ffffff;
@@ -80,9 +81,14 @@ button.secondary {
   color: var(--error);
 }
 
+.counter {
+  margin: 1rem 0 0.5rem;
+  color: var(--muted);
+}
+
 .items {
   list-style: none;
-  margin: 1rem 0 0;
+  margin: 0;
   padding: 0;
   border-top: 1px solid var(--border);
 }
