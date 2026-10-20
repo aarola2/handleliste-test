@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { expect, test } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
 import App from './App.tsx'
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
 
 test('viser overskriften', () => {
   render(<App />)
@@ -115,4 +119,31 @@ test('husker varer, avkrysning og sletting når appen startes på nytt', async (
   expect(screen.getByRole('checkbox', { name: 'Melk' })).toBeChecked()
   expect(screen.getByRole('checkbox', { name: 'Egg' })).not.toBeChecked()
   expect(screen.queryByRole('checkbox', { name: 'Brød' })).not.toBeInTheDocument()
+})
+
+test('starter med tom liste uten å krasje når det lagrede er ødelagt', () => {
+  localStorage.setItem('handleliste', '{ikke json')
+
+  render(<App />)
+
+  expect(screen.getByText('Listen er tom.')).toBeInTheDocument()
+})
+
+test('kan legge til, krysse av og slette når lagringen er blokkert', async () => {
+  const blocked = () => {
+    throw new DOMException('Lagring er blokkert', 'SecurityError')
+  }
+  vi.spyOn(Storage.prototype, 'getItem').mockImplementation(blocked)
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(blocked)
+  const user = userEvent.setup()
+  render(<App />)
+  const field = screen.getByLabelText('Vare')
+
+  await user.type(field, 'Melk{Enter}')
+  await user.type(field, 'Brød{Enter}')
+  await user.click(screen.getByRole('checkbox', { name: 'Melk' }))
+  await user.click(screen.getByRole('button', { name: 'Slett Brød' }))
+
+  expect(screen.getAllByRole('listitem')).toHaveLength(1)
+  expect(screen.getByRole('checkbox', { name: 'Melk' })).toBeChecked()
 })
