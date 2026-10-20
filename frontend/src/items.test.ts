@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { addItem, removeItem, toggleItem, type Item } from './items.ts'
+import { addItem, findByName, removeItem, toggleItem, type Item } from './items.ts'
 
 describe('addItem', () => {
   test('legger varen sist i listen', () => {
@@ -39,6 +39,31 @@ describe('addItem', () => {
 
   test('legger til varen som ikke handlet', () => {
     expect(addItem([], 'Melk')[0]?.bought).toBe(false)
+  })
+
+  test('legger ikke til en vare som allerede står i listen', () => {
+    const items: Item[] = [{ id: 1, name: 'Melk', bought: true }]
+
+    expect(addItem(items, ' MELK ')).toBe(items)
+  })
+})
+
+describe('findByName', () => {
+  const items: Item[] = [
+    { id: 1, name: 'Melk', bought: false },
+    { id: 2, name: 'Brød', bought: true },
+  ]
+
+  test.each(['Melk', 'melk', 'MELK', ' melk '])('finner «Melk» når navnet er «%s»', (name) => {
+    expect(findByName(items, name)?.id).toBe(1)
+  })
+
+  test('sammenligner æ, ø og å uavhengig av store og små bokstaver', () => {
+    expect(findByName(items, 'BRØD')?.id).toBe(2)
+  })
+
+  test('finner ingenting når navnet bare ligner', () => {
+    expect(findByName(items, 'Melke')).toBeUndefined()
   })
 })
 
