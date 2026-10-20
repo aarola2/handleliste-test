@@ -56,3 +56,15 @@ test('krysser av en vare og fjerner avkrysningen igjen', async () => {
   await user.click(checkbox)
   expect(checkbox).not.toBeChecked()
 })
+
+test('viser at listen er tom til den første varen legges til, og igjen når den siste slettes', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+  expect(screen.getByText('Listen er tom.')).toBeInTheDocument()
+
+  await user.type(screen.getByLabelText('Vare'), 'Melk{Enter}')
+  expect(screen.queryByText('Listen er tom.')).not.toBeInTheDocument()
+
+  await user.click(screen.getByRole('button', { name: 'Slett Melk' }))
+  expect(screen.getByText('Listen er tom.')).toBeInTheDocument()
+})

@@ -104,3 +104,15 @@ test('sender id-en til varen som slettes', async () => {
 
   expect(onRemove).toHaveBeenCalledExactlyOnceWith(2)
 })
+
+test('sier fra at listen er tom når det ikke finnes varer', () => {
+  render(<ItemList onToggle={noop} onRemove={noop} items={[]} />)
+
+  expect(screen.getByText('Listen er tom.')).toBeInTheDocument()
+})
+
+test('sier ikke at listen er tom når det finnes varer', () => {
+  render(<ItemList onToggle={noop} onRemove={noop} items={[{ id: 1, name: 'Melk', bought: true }]} />)
+
+  expect(screen.queryByText('Listen er tom.')).not.toBeInTheDocument()
+})
